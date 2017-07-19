@@ -306,10 +306,19 @@ class PlanningGraph():
         # TODO add action A level to the planning graph as described in the Russell-Norvig text
         # 1. determine what actions to add and create those PgNode_a objects
         # 2. connect the nodes to the previous S literal level
-        # for example, the A0 level will iterate through all possible actions for the problem and add a PgNode_a to a_levels[0]
+        # for example, the A0 level will iterate through all possible actions for the problem and add a 
+        #   PgNode_a to a_levels[0]
         #   set iff all prerequisite literals for the action hold in S0.  This can be accomplished by testing
         #   to see if a proposed PgNode_a has prenodes that are a subset of the previous S level.  Once an
         #   action node is added, it MUST be connected to the S node instances in the appropriate s_level set.
+        for a in self.all_actions:
+            # get the set of precond node
+            action_precond = a.
+            # check whether subset of s i-1
+            if action_precond.issubset(self.s_level(level - 1)):
+                new_action_node = PgNode_a()
+                linkup(new_action_node, self.s_level(level - 1))
+                self.a_level(level).add(new_action_node)
 
     def add_literal_level(self, level):
         """ add an S (literal) level to the Planning Graph
