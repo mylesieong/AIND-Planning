@@ -311,14 +311,14 @@ class PlanningGraph():
         #   set iff all prerequisite literals for the action hold in S0.  This can be accomplished by testing
         #   to see if a proposed PgNode_a has prenodes that are a subset of the previous S level.  Once an
         #   action node is added, it MUST be connected to the S node instances in the appropriate s_level set.
-        for a in self.all_actions:
-            # get the set of precond node
-            action_precond = a.
-            # check whether subset of s i-1
-            if action_precond.issubset(self.s_level(level - 1)):
-                new_action_node = PgNode_a()
-                linkup(new_action_node, self.s_level(level - 1))
-                self.a_level(level).add(new_action_node)
+#        for a in self.all_actions:
+#            # get the set of precond node
+#            action_precond = a.
+#            # check whether subset of s i-1
+#            if action_precond.issubset(self.s_level(level - 1)):
+#                new_action_node = PgNode_a()
+#                linkup(new_action_node, self.s_level(level - 1))
+#                self.a_level(level).add(new_action_node)
 
     def add_literal_level(self, level):
         """ add an S (literal) level to the Planning Graph
@@ -394,7 +394,19 @@ class PlanningGraph():
         :param node_a2: PgNode_a
         :return: bool
         """
-        # TODO test for Inconsistent Effects between nodes
+        effect_add_a1 = node_a1.action.effect_add
+        effect_rem_a1 = node_a1.action.effect_rem
+        effect_add_a2 = node_a2.action.effect_add
+        effect_rem_a2 = node_a2.action.effect_rem
+
+        for e in effect_add_a1:
+            if e in effect_rem_a2: 
+                return True
+
+        for e in effect_add_a2:
+            if e in effect_rem_a1: 
+                return True
+
         return False
 
     def interference_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
@@ -411,7 +423,19 @@ class PlanningGraph():
         :param node_a2: PgNode_a
         :return: bool
         """
-        # TODO test for Interference between nodes
+        effect_add_a1 = node_a1.action.effect_add
+        precond_neg_a1 = node_a1.action.precond_neg
+        effect_add_a2 = node_a2.action.effect_add
+        precond_neg_a2 = node_a2.action.precond_neg
+
+        for e in effect_add_a1:
+            if e in precond_neg_a2: 
+                return True
+
+        for e in effect_add_a2:
+            if e in precond_neg_a1: 
+                return True
+
         return False
 
     def competing_needs_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
@@ -424,8 +448,19 @@ class PlanningGraph():
         :param node_a2: PgNode_a
         :return: bool
         """
+        precond_pos_a1 = node_a1.action.precond_pos
+        precond_neg_a1 = node_a1.action.precond_neg
+        precond_pos_a2 = node_a2.action.precond_pos
+        precond_neg_a2 = node_a2.action.precond_neg
 
-        # TODO test for Competing Needs between nodes
+        for p in precond_pos_a1:
+            if p in precond_neg_a2: 
+                return True
+
+        for p in precond_pos_a2:
+            if p in precond_neg_a1: 
+                return True
+
         return False
 
     def update_s_mutex(self, nodeset: set):
