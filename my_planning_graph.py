@@ -588,7 +588,10 @@ class PlanningGraph():
         :return: int
         """
         level_sum = 0
-        for g in self.goal:
-            level_sum += (i for i in len(self.s_levels) if goal in s_levels(i))
+        for g in self.problem.goal:
+            for i in range(len(self.s_levels)):
+                if g in [n.symbol for n in self.s_levels[i]]:
+                    level_sum += i
+                    break
 
         return level_sum
