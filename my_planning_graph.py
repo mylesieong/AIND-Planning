@@ -326,7 +326,7 @@ class PlanningGraph():
                     return False
 
             for ln in a_precond_neg:
-                if ln not in [n.symbol for n in states if !n.is_pos]:
+                if ln not in [n.symbol for n in states if not n.is_pos]:
                     return False
 
             return True
@@ -341,13 +341,15 @@ class PlanningGraph():
 
             for n in states:
                 for lp in a_precond_pos:
-                    if (n.is_pos and lp = n.symbol):
+                    if (n.is_pos and lp == n.symbol):
                         action_node.parents.add(n)
                         n.children.add(action_node)
                 for ln in a_precond_neg:
-                    if (!n.is_pos and ln = n.symbol):
+                    if (not n.is_pos and ln == n.symbol):
                         action_node.parents.add(n)
                         n.children.add(action_node)
+
+        self.a_levels.append(set())  # A-level set of a_nodes - empty to start
 
         for a in self.all_actions:
             if is_action_valid(a, self.s_levels[level]):
@@ -373,24 +375,28 @@ class PlanningGraph():
         #   all of the new S nodes as children of all the A nodes that could produce them, and likewise add the A nodes to the
         #   parent sets of the S nodes
 
+        self.s_levels.append(set())  # S-level set of s_nodes - empty to start
+
         for n in self.a_levels[level - 1]:
             # Add positive effects of action a
             for ea in n.action.effect_add:
-                if ea in [s.symbol for s in self.s_levels[level] if s.is_pos]:
-                    s.parents.add(n)
-                else:
-                    node = PgNode_s(ea, True)
-                    node.parents.add(n)
-                    self.s_levels[level].add(node)
+                for s in self.s_levels[level]:
+                    if (s.is_pos and ea == s.symbol):
+                        s.parents.add(n)
+                    else:
+                        node = PgNode_s(ea, True)
+                        node.parents.add(n)
+                        self.s_levels[level].add(node)
 
             # Add negative effects of action a
             for er in n.action.effect_rem:
-                if er in [s.symbol for s in self.s_levels[level] if !s.is_pos]:
-                    s.parents.add(n)
-                else:
-                    node = PgNode_s(er, False)
-                    node.parents.add(n)
-                    self.s_levels[level].add(node)
+                for s in self.s_levels[level]:
+                    if (not s.is_pos and er == s.symbol):
+                        s.parents.add(n)
+                    else:
+                        node = PgNode_s(er, False)
+                        node.parents.add(n)
+                        self.s_levels[level].add(node)
 
     def update_a_mutex(self, nodeset):
         """ Determine and update sibling mutual exclusion for A-level nodes
@@ -550,7 +556,7 @@ class PlanningGraph():
         :return: bool
         """
         return  (node_s1.symbol == node_s2.symbol and
-                node_s1.is_pos <> node_s2.is_pos)
+                node_s1.is_pos != node_s2.is_pos)
 
     def inconsistent_support_mutex(self, node_s1: PgNode_s, node_s2: PgNode_s):
         """
