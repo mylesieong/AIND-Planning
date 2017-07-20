@@ -311,14 +311,49 @@ class PlanningGraph():
         #   set iff all prerequisite literals for the action hold in S0.  This can be accomplished by testing
         #   to see if a proposed PgNode_a has prenodes that are a subset of the previous S level.  Once an
         #   action node is added, it MUST be connected to the S node instances in the appropriate s_level set.
+
+        def is_action_valid(action, state) -> bool:
+            """ Return whether action has its precond satisfied in state
+            :param action: action
+            :param state: list of PgNode_s
+            :return bool
+            """
+            a_precond_pos = a.precond_pos
+            a_precond_neg = a.precond_neg
+
+            for lp in a_precond_pos:
+                if lp not in [n.symbol for n in state if n.is_pos]:
+                    return False
+
+            for ln in a_precond_neg:
+                if ln not in [n.symbol for n in state if !n.is_pos]:
+                    return False
+
+            return True
+
+        def add_action_level_link(action_node, state):
+            """ Link up given PgNode_a to PgNode_s in given list that contains its precondition
+            :param action_node: PgNode_a 
+            :param state: list of PgNode_s
+            """
+            a_precond_pos = action_node.action.precond_pos
+            a_precond_neg = action_node.action.precond_neg
+
+            for n in state:
+                for lp in a_precond_pos:
+                    if (n.is_pos and lp = n.symbol):
+                        action_node.parents.add(n)
+                        n.children.add(action_node)
+                for ln in a_precond_neg:
+                    if (!n.is_pos and ln = n.symbol):
+                        action_node.parents.add(n)
+                        n.children.add(action_node)
+
         for a in self.all_actions:
-            # get the set of precond node
-            action_precond = a.
-            # check whether subset of s i-1
-            if action_precond.issubset(self.s_level(level - 1)):
-                new_action_node = PgNode_a()
-                linkup(new_action_node, self.s_level(level - 1))
-                self.a_level(level).add(new_action_node)
+            if is_action_valid(a, self.s_levels[level]):
+                node = PgNode_a(a)
+                add_action_level_link(node, self.s_levels[level])
+                self.a_levels[level].add(node)
 
     def add_literal_level(self, level):
         """ add an S (literal) level to the Planning Graph
