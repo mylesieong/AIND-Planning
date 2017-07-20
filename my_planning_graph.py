@@ -312,34 +312,34 @@ class PlanningGraph():
         #   to see if a proposed PgNode_a has prenodes that are a subset of the previous S level.  Once an
         #   action node is added, it MUST be connected to the S node instances in the appropriate s_level set.
 
-        def is_action_valid(action, state) -> bool:
+        def is_action_valid(action, states) -> bool:
             """ Return whether action has its precond satisfied in state
             :param action: action
-            :param state: list of PgNode_s
+            :param states: list of PgNode_s
             :return bool
             """
             a_precond_pos = a.precond_pos
             a_precond_neg = a.precond_neg
 
             for lp in a_precond_pos:
-                if lp not in [n.symbol for n in state if n.is_pos]:
+                if lp not in [n.symbol for n in states if n.is_pos]:
                     return False
 
             for ln in a_precond_neg:
-                if ln not in [n.symbol for n in state if !n.is_pos]:
+                if ln not in [n.symbol for n in states if !n.is_pos]:
                     return False
 
             return True
 
-        def add_action_level_link(action_node, state):
+        def add_action_level_link(action_node, states):
             """ Link up given PgNode_a to PgNode_s in given list that contains its precondition
             :param action_node: PgNode_a 
-            :param state: list of PgNode_s
+            :param states: list of PgNode_s
             """
             a_precond_pos = action_node.action.precond_pos
             a_precond_neg = action_node.action.precond_neg
 
-            for n in state:
+            for n in states:
                 for lp in a_precond_pos:
                     if (n.is_pos and lp = n.symbol):
                         action_node.parents.add(n)
@@ -373,6 +373,24 @@ class PlanningGraph():
         #   all of the new S nodes as children of all the A nodes that could produce them, and likewise add the A nodes to the
         #   parent sets of the S nodes
 
+        for n in self.a_levels[level - 1]:
+            # Add positive effects of action a
+            for ea in n.action.effect_add:
+                if ea in [s.symbol for s in self.s_levels[level] if s.is_pos]:
+                    s.parents.add(n)
+                else:
+                    node = PgNode_s(ea, True)
+                    node.parents.add(n)
+                    self.s_levels[level].add(node)
+
+            # Add negative effects of action a
+            for er in n.action.effect_rem:
+                if er in [s.symbol for s in self.s_levels[level] if !s.is_pos]:
+                    s.parents.add(n)
+                else:
+                    node = PgNode_s(er, False)
+                    node.parents.add(n)
+                    self.s_levels[level].add(node)
 
     def update_a_mutex(self, nodeset):
         """ Determine and update sibling mutual exclusion for A-level nodes
