@@ -160,3 +160,52 @@ Unload(C1, P1, JFK)
 Unload(C2, P2, SFO)
 
 
+## Air Cargo Problem 2 breadth_first_search...
+
+Expansions   Goal Tests   New Nodes
+   3343        4609       30509
+
+Plan length: 9  Time elapsed in seconds: 18.19539373017354
+Load(C2, P2, JFK)
+Load(C1, P1, SFO)
+Load(C3, P3, ATL)
+Fly(P2, JFK, SFO)
+Unload(C2, P2, SFO)
+Fly(P1, SFO, JFK)
+Unload(C1, P1, JFK)
+Fly(P3, ATL, SFO)
+Unload(C3, P3, SFO)
+
+## Air Cargo Problem 2 breadth_first_tree_search
+Too long to wait
+
+## Air Cargo Problem 2 depth_first_graph_search...
+
+Expansions   Goal Tests   New Nodes
+   582         583         5211
+
+Plan length: 575  Time elapsed in seconds: 5.5677113267400635
+Fly(P3, ATL, SFO)
+Fly(P1, SFO, ATL)
+Fly(P3, SFO, JFK)
+Fly(P1, ATL, JFK)
+Fly(P2, JFK, ATL)
+Fly(P3, JFK, ATL)
+Fly(P2, ATL, SFO)
+Fly(P3, ATL, SFO)
+Load(C1, P3, SFO)
+Fly(P3, SFO, ATL)
+...
+Unload(C1, P3, JFK)
+Fly(P2, SFO, JFK)
+Fly(P3, JFK, ATL)
+Fly(P2, JFK, ATL)
+Fly(P3, ATL, SFO)
+Fly(P1, JFK, ATL)
+Fly(P2, ATL, SFO)
+Fly(P1, ATL, SFO)
+Fly(P3, SFO, ATL)
+Unload(C3, P1, SFO)
+
+## Air Cargo Problem 2 depth_limited_search 
+Too long to wait
