@@ -484,16 +484,33 @@ class PlanningGraph():
         :return: bool
         """
         effect_add_a1 = node_a1.action.effect_add
-        precond_neg_a1 = node_a1.action.precond_neg
-        effect_add_a2 = node_a2.action.effect_add
+        effect_rem_a1 = node_a1.action.effect_rem
+        precond_pos_a2 = node_a2.action.precond_pos
         precond_neg_a2 = node_a2.action.precond_neg
 
+        # Test if node1's effect_add is neg to node2
         for e in effect_add_a1:
             if e in precond_neg_a2: 
                 return True
 
+        # Test if node1's effect_rem is neg to node2
+        for e in effect_rem_a1:
+            if e in precond_pos_a2: 
+                return True
+
+        effect_add_a2 = node_a2.action.effect_add
+        effect_rem_a2 = node_a2.action.effect_rem
+        precond_pos_a1 = node_a1.action.precond_pos
+        precond_neg_a1 = node_a1.action.precond_neg
+
+        # Test if node2's effect_add is neg to node1
         for e in effect_add_a2:
             if e in precond_neg_a1: 
+                return True
+
+        # Test if node2's effect_rem is neg to node1
+        for e in effect_rem_a2:
+            if e in precond_pos_a1: 
                 return True
 
         return False
