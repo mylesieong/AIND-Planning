@@ -308,7 +308,7 @@ class PlanningGraph():
         # 2. connect the nodes to the previous S literal level
         # for example, the A0 level will iterate through all possible actions for the problem and add a 
         #   PgNode_a to a_levels[0]
-        #   set iff all prerequisite literals for the action hold in S0.  This can be accomplished by testing
+        #   set if all prerequisite literals for the action hold in S0.  This can be accomplished by testing
         #   to see if a proposed PgNode_a has prenodes that are a subset of the previous S level.  Once an
         #   action node is added, it MUST be connected to the S node instances in the appropriate s_level set.
 
@@ -351,11 +351,31 @@ class PlanningGraph():
 
         self.a_levels.append(set())  # A-level set of a_nodes - empty to start
 
+        # Debug Message
+        print("All actions are: ")
+        for a in self.all_actions:
+            print(a)
+        print("\n@BEFORE s_levels[{}] nodes are: ".format(level))
+        for n in self.s_levels[level]:
+            print(n.show())
+        print("\n@BEFORE a_levels[{}] nodes are: ".format(level))
+        for n in self.a_levels[level]:
+            print(n.show())
+
         for a in self.all_actions:
             if is_action_valid(a, self.s_levels[level]):
                 node = PgNode_a(a)
                 add_action_level_link(node, self.s_levels[level])
                 self.a_levels[level].add(node)
+
+        # Debug Message
+        print("\n@AFTER s_levels[{}] nodes are: ".format(level))
+        for n in self.s_levels[level]:
+            print(n.show())
+        print("\n@AFTER a_levels[{}] nodes are: ".format(level))
+        for n in self.a_levels[level]:
+            print(n.show())
+        print("\ndebug************************************\n")
 
     def add_literal_level(self, level):
         """ add an S (literal) level to the Planning Graph
@@ -377,26 +397,40 @@ class PlanningGraph():
 
         self.s_levels.append(set())  # S-level set of s_nodes - empty to start
 
+        # Debug Message
+        print("\n@BEFORE a_levels[{}] nodes are: ".format(level - 1))
         for n in self.a_levels[level - 1]:
-            # Add positive effects of action a
-            for ea in n.action.effect_add:
-                for s in self.s_levels[level]:
-                    if (s.is_pos and ea == s.symbol):
-                        s.parents.add(n)
-                    else:
-                        node = PgNode_s(ea, True)
-                        node.parents.add(n)
-                        self.s_levels[level].add(node)
+            print(n.show())
+        print("\n@BEFORE s_levels[{}] nodes are: ".format(level))
+        for n in self.s_levels[level]:
+            print(n.show())
 
-            # Add negative effects of action a
-            for er in n.action.effect_rem:
-                for s in self.s_levels[level]:
-                    if (not s.is_pos and er == s.symbol):
-                        s.parents.add(n)
-                    else:
-                        node = PgNode_s(er, False)
-                        node.parents.add(n)
-                        self.s_levels[level].add(node)
+        for n in self.a_levels[level - 1]:
+            # Add positive effect of parent action node
+            for eff in n.action.effect_add:
+                node = PgNode_s(eff, True)
+                node.parents.add(n)
+                n.children.add(node)
+                self.s_levels[level].add(node)
+            # Add negative effect of parent action node
+            for eff in n.action.effect_rem:
+                node = PgNode_s(eff, False)
+                node.parents.add(n)
+                n.children.add(node)
+                self.s_levels[level].add(node)
+
+        # ? what happen if node with same effect existed already?
+        # ? Can we use the python interactive console to test an air cargo case?
+
+
+        # Debug Message
+        print("\n@AFTER a_levels[{}] nodes are: ".format(level - 1))
+        for n in self.a_levels[level - 1]:
+            print(n.show())
+        print("\n@AFTER s_levels[{}] nodes are: ".format(level))
+        for n in self.s_levels[level]:
+            print(n.show())
+        print("\ndebug************************************\n")
 
     def update_a_mutex(self, nodeset):
         """ Determine and update sibling mutual exclusion for A-level nodes
