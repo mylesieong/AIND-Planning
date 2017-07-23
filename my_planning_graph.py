@@ -525,6 +525,7 @@ class PlanningGraph():
         :param node_a2: PgNode_a
         :return: bool
         """
+        # Check the action's precond conflicts
         precond_pos_a1 = node_a1.action.precond_pos
         precond_neg_a1 = node_a1.action.precond_neg
         precond_pos_a2 = node_a2.action.precond_pos
@@ -537,6 +538,15 @@ class PlanningGraph():
         for p in precond_pos_a2:
             if p in precond_neg_a1: 
                 return True
+
+        # Check the parent of action node's mutexity
+        parents_a1 = node_a1.parents
+        parents_a2 = node_a2.parents
+
+        for p1 in parents_a1:
+            for p2 in parents_a2:
+                if p1.is_mutex(p2):
+                    return True
 
         return False
 
