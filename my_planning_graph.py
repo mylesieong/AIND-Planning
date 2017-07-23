@@ -351,16 +351,16 @@ class PlanningGraph():
 
         self.a_levels.append(set())  # A-level set of a_nodes - empty to start
 
-        # Debug Message
-        print("All actions are: ")
-        for a in self.all_actions:
-            print(a)
-        print("\n@BEFORE s_levels[{}] nodes are: ".format(level))
-        for n in self.s_levels[level]:
-            print(n.show())
-        print("\n@BEFORE a_levels[{}] nodes are: ".format(level))
-        for n in self.a_levels[level]:
-            print(n.show())
+        ## Debug Message
+        #print("All actions are: ")
+        #for a in self.all_actions:
+        #    print(a)
+        #print("\n@BEFORE s_levels[{}] nodes are: ".format(level))
+        #for n in self.s_levels[level]:
+        #    print(n.show())
+        #print("\n@BEFORE a_levels[{}] nodes are: ".format(level))
+        #for n in self.a_levels[level]:
+        #    print(n.show())
 
         for a in self.all_actions:
             if is_action_valid(a, self.s_levels[level]):
@@ -368,14 +368,14 @@ class PlanningGraph():
                 add_action_level_link(node, self.s_levels[level])
                 self.a_levels[level].add(node)
 
-        # Debug Message
-        print("\n@AFTER s_levels[{}] nodes are: ".format(level))
-        for n in self.s_levels[level]:
-            print(n.show())
-        print("\n@AFTER a_levels[{}] nodes are: ".format(level))
-        for n in self.a_levels[level]:
-            print(n.show())
-        print("\ndebug************************************\n")
+        ## Debug Message
+        #print("\n@AFTER s_levels[{}] nodes are: ".format(level))
+        #for n in self.s_levels[level]:
+        #    print(n.show())
+        #print("\n@AFTER a_levels[{}] nodes are: ".format(level))
+        #for n in self.a_levels[level]:
+        #    print(n.show())
+        #print("\ndebug************************************\n")
 
     def add_literal_level(self, level):
         """ add an S (literal) level to the Planning Graph
@@ -397,13 +397,13 @@ class PlanningGraph():
 
         self.s_levels.append(set())  # S-level set of s_nodes - empty to start
 
-        # Debug Message
-        print("\n@BEFORE a_levels[{}] nodes are: ".format(level - 1))
-        for n in self.a_levels[level - 1]:
-            print(n.show())
-        print("\n@BEFORE s_levels[{}] nodes are: ".format(level))
-        for n in self.s_levels[level]:
-            print(n.show())
+        ## Debug Message
+        #print("\n@BEFORE a_levels[{}] nodes are: ".format(level - 1))
+        #for n in self.a_levels[level - 1]:
+        #    print(n.show())
+        #print("\n@BEFORE s_levels[{}] nodes are: ".format(level))
+        #for n in self.s_levels[level]:
+        #    print(n.show())
 
         for n in self.a_levels[level - 1]:
             # Add positive effect of parent action node
@@ -423,14 +423,14 @@ class PlanningGraph():
         # ? Can we use the python interactive console to test an air cargo case?
 
 
-        # Debug Message
-        print("\n@AFTER a_levels[{}] nodes are: ".format(level - 1))
-        for n in self.a_levels[level - 1]:
-            print(n.show())
-        print("\n@AFTER s_levels[{}] nodes are: ".format(level))
-        for n in self.s_levels[level]:
-            print(n.show())
-        print("\ndebug************************************\n")
+        ## Debug Message
+        #print("\n@AFTER a_levels[{}] nodes are: ".format(level - 1))
+        #for n in self.a_levels[level - 1]:
+        #    print(n.show())
+        #print("\n@AFTER s_levels[{}] nodes are: ".format(level))
+        #for n in self.s_levels[level]:
+        #    print(n.show())
+        #print("\ndebug************************************\n")
 
     def update_a_mutex(self, nodeset):
         """ Determine and update sibling mutual exclusion for A-level nodes
@@ -648,11 +648,13 @@ class PlanningGraph():
 
         :return: int
         """
+        def get_level_of_goal(self, goal) -> int:
+            for i in range(len(self.s_levels)):
+                if (goal, True) in [(n.symbol, n.is_pos) for n in self.s_levels[i]]:
+                    return i
+
         level_sum = 0
         for g in self.problem.goal:
-            for i in range(len(self.s_levels)):
-                if g in [n.symbol for n in self.s_levels[i]]:
-                    level_sum += i
-                    break
+            level_sum += get_level_of_goal(self, g)
 
         return level_sum
