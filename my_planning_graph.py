@@ -650,6 +650,7 @@ class PlanningGraph():
         """
         def get_level_of_goal(self, goal) -> int:
             for i in range(len(self.s_levels)):
+                # ? what is for goal that is not True? like ~Have(Cake)
                 if (goal, True) in [(n.symbol, n.is_pos) for n in self.s_levels[i]]:
                     return i
 
