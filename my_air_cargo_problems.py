@@ -204,10 +204,52 @@ class AirCargoProblem(Problem):
         conditions by ignoring the preconditions required for an action to be
         executed.
         """
-        # TODO implement (see Russell-Norvig Ed-3 10.2.3  or Russell-Norvig Ed-2 11.2)
-        count = 0
-        return count
 
+        def get_most_cover_act(self, set_list):
+        """This helper function iterate given set list and return the element
+        that presents most among all sets, if 2 or more elements share same
+        presence level, return one of them.
+        """
+            # TODO
+            # Build an index dictationary
+            d = dict()
+            for s in set_list:
+                for e in s:
+                    if e not in d:
+                        d[e] = 0
+                    else:
+                        d[e]++
+
+            # Get the key with biggest value
+            max_value = 0
+            for key, value in d.iteritems():
+                if value > max_value:
+                    result = key
+                    max_value = value
+
+            return result 
+
+        ignore_precond_actions = set()
+
+        # Get the goals that is not yet satisfied
+        kb = PropKB()
+        kb.tell(decode_state(state, self.state_map).pos_sentence())
+        for clauses in self.goal:
+            if clauses not in kb.clauses:
+                goal_not_yet.add(clauses)
+
+        # Build set of actions actions_set[] that can achieve goals in goal_not_yet 
+        for g in goal_not_yet:
+            act_set_list[g] = [a for a in self.actions_list if g in a.effect_add]
+
+        while act_set_list: 
+            most_cover_act = get_most_cover_act(self, act_set_list)
+            ignore_precond_actions.add(most_cover_act) 
+            for s in act_set_list:
+                if most_cover_act in s:
+                    act_set_list.remove(s)
+
+        return len(ignore_precond_actions)
 
 def air_cargo_p1() -> AirCargoProblem:
     cargos = ['C1', 'C2']
