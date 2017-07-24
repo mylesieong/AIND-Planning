@@ -351,31 +351,11 @@ class PlanningGraph():
 
         self.a_levels.append(set())  # A-level set of a_nodes - empty to start
 
-        ## Debug Message
-        #print("All actions are: ")
-        #for a in self.all_actions:
-        #    print(a)
-        #print("\n@BEFORE s_levels[{}] nodes are: ".format(level))
-        #for n in self.s_levels[level]:
-        #    print(n.show())
-        #print("\n@BEFORE a_levels[{}] nodes are: ".format(level))
-        #for n in self.a_levels[level]:
-        #    print(n.show())
-
         for a in self.all_actions:
             if is_action_valid(a, self.s_levels[level]):
                 node = PgNode_a(a)
                 add_action_level_link(node, self.s_levels[level])
                 self.a_levels[level].add(node)
-
-        ## Debug Message
-        #print("\n@AFTER s_levels[{}] nodes are: ".format(level))
-        #for n in self.s_levels[level]:
-        #    print(n.show())
-        #print("\n@AFTER a_levels[{}] nodes are: ".format(level))
-        #for n in self.a_levels[level]:
-        #    print(n.show())
-        #print("\ndebug************************************\n")
 
     def add_literal_level(self, level):
         """ add an S (literal) level to the Planning Graph
@@ -395,42 +375,36 @@ class PlanningGraph():
         #   all of the new S nodes as children of all the A nodes that could produce them, and likewise add the A nodes to the
         #   parent sets of the S nodes
 
+        def get_state_node(symbol, is_pos) -> PgNode_s: 
+            """ Create new PgNode_s or retrieve PgNode_s from s_levels[level]. If a node with the
+                effect and the is_pos is exist already, retrun that PgNode_s; if not, create a new
+                node and return it after adding it to s_levels[level]
+            :param symbol: str
+            :param is_pos: bool
+            :return: PgNode_s
+            """
+            for n in self.s_levels[level]:
+                if n.symbol == symbol and n.is_pos == is_pos:
+                    return n
+                
+            node = PgNode_s(symbol, is_pos)
+            self.s_levels[level].add(node)
+            return node
+
         self.s_levels.append(set())  # S-level set of s_nodes - empty to start
 
-        ## Debug Message
-        #print("\n@BEFORE a_levels[{}] nodes are: ".format(level - 1))
-        #for n in self.a_levels[level - 1]:
-        #    print(n.show())
-        #print("\n@BEFORE s_levels[{}] nodes are: ".format(level))
-        #for n in self.s_levels[level]:
-        #    print(n.show())
-
-        for n in self.a_levels[level - 1]:
+        for an in self.a_levels[level - 1]:
             # Add positive effect of parent action node
-            for eff in n.action.effect_add:
-                node = PgNode_s(eff, True)
-                node.parents.add(n)
-                n.children.add(node)
-                self.s_levels[level].add(node)
+            for eff in an.action.effect_add:
+                node = get_state_node(eff, True)
+                node.parents.add(an)
+                an.children.add(node)
+
             # Add negative effect of parent action node
-            for eff in n.action.effect_rem:
-                node = PgNode_s(eff, False)
-                node.parents.add(n)
-                n.children.add(node)
-                self.s_levels[level].add(node)
-
-        # ? what happen if node with same effect existed already?
-        # ? Can we use the python interactive console to test an air cargo case?
-
-
-        ## Debug Message
-        #print("\n@AFTER a_levels[{}] nodes are: ".format(level - 1))
-        #for n in self.a_levels[level - 1]:
-        #    print(n.show())
-        #print("\n@AFTER s_levels[{}] nodes are: ".format(level))
-        #for n in self.s_levels[level]:
-        #    print(n.show())
-        #print("\ndebug************************************\n")
+            for eff in an.action.effect_rem:
+                node = get_state_node(eff, False)
+                node.parents.add(an)
+                an.children.add(node)
 
     def update_a_mutex(self, nodeset):
         """ Determine and update sibling mutual exclusion for A-level nodes
@@ -650,7 +624,7 @@ class PlanningGraph():
         """
         def get_level_of_goal(self, goal) -> int:
             for i in range(len(self.s_levels)):
-                # ? what is for goal that is not True? like ~Have(Cake)
+                # To Improve: Consider situation that the goal is not True, like ~Have(Cake)
                 if (goal, True) in [(n.symbol, n.is_pos) for n in self.s_levels[i]]:
                     return i
 
