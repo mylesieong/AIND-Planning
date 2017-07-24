@@ -204,52 +204,11 @@ class AirCargoProblem(Problem):
         conditions by ignoring the preconditions required for an action to be
         executed.
         """
-
-        def get_most_cover_act(self, dt):
-            """This helper function iterate given set list and return the element
-            that presents most among all sets, if 2 or more elements share same
-            presence level, return one of them.
-            :param dt: a dict that use goal as key, list of actions as value
-            """
-            # Build an index dictationary
-            d = dict()
-            for k in dt:
-                for e in dt[k]:
-                    if e not in d:
-                        d[e] = 0
-                    else:
-                        d[e] = d[e] + 1
-
-            # Get the key with biggest value
-            max_value = 0
-            action = 0
-            for k in d:
-                if d[k] > max_value:
-                    action = k
-                    max_value =d[k] 
-
-            return action 
-
-        # Get the goals that is not yet satisfied
         kb = PropKB()
         kb.tell(decode_state(node.state, self.state_map).pos_sentence())
         goal_not_yet = set(self.goal) - set(kb.clauses)
 
-        # Build dict strategy_of_goal: key is goal and value is a list of strategy that achieve goal
-        strategy_of_goal = dict()
-        for g in goal_not_yet:
-            strategy_of_goal[g] = [a for a in self.actions_list if g in a.effect_add]
-
-        # Build list ignore_precond_actions which minimal set of actions to achieve goal_not_yet
-        ignore_precond_actions = set()
-        while strategy_of_goal: 
-            most_cover_act = get_most_cover_act(self, strategy_of_goal)
-            ignore_precond_actions.add(most_cover_act) 
-            for g in strategy_of_goal:
-                if most_cover_act in strategy_of_goal[g]:
-                    strategy_of_goal.remove(g)
-
-        return len(ignore_precond_actions)
+        return len(goal_not_yet)
 
 def air_cargo_p1() -> AirCargoProblem:
     cargos = ['C1', 'C2']
