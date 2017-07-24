@@ -207,6 +207,9 @@ class AirCargoProblem(Problem):
         kb = PropKB()
         kb.tell(decode_state(node.state, self.state_map).pos_sentence())
         goal_not_yet = set(self.goal) - set(kb.clauses)
+        # To Improve: Make this heuristic more admissible by considering the 
+        # fact that some actions can achieve more than 1 goal at the same time,
+        # rather than assumming every goal is to be achieve by 1 action 
 
         return len(goal_not_yet)
 
